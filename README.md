@@ -11,9 +11,9 @@ To run the file with all it's requirements, download the latest release, extract
 ```sudo ./mkdirfile.sh ```
 4. Run the binary with
 ```./EyeLight.out ```
-5. Change values of files at /etc/.EyeLight/ to edit temperature values
-    i. Accepted range of temperature is between 1000 - 10000
-   ii. Needs root/admin access to be edited
+5. Change values of files at /etc/.EyeLight/ to edit temperature values.
+i. Accepted range of temperature is between 1000 - 10000
+ii. Needs root/admin access to be edited
    
 ## Possible issues
 1. No change in screen colour on starting program - Can be fixed by editing any of the files at /etc/.EyeLight/ once
