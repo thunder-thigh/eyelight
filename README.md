@@ -1,7 +1,16 @@
 # eyelight
 EyeLight is a localtime based GUI+CLI tool to set temperature of displays for X11 clients.
 
+
 ## Installation
+
+### Dependecies
+It requires sct to be installed.
+Install it with\n
+* for debian/ubuntu/mint ```sudo apt install sct```
+* for fedora distros ```sudo dnf install sct```
+
+### Application installation 
 There happens to be no application installation yet. I plan on adding it very soon.
 To run the file with all it's requirements, download the latest release, extract the zip archive.
 1. cd into the extracted archive.
