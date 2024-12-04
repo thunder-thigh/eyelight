@@ -1,5 +1,5 @@
 # eyelight
-EyeLight is a localtime based GUI+CLI tool to set temperature of displays for X11 clients.
+EyeLight is a localtime based CLI+GUI(kinda) tool to set temperature of displays for X11 clients.
 
 
 ## Installation
