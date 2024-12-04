@@ -6,7 +6,7 @@ EyeLight is a localtime based GUI+CLI tool to set temperature of displays for X1
 
 ### Dependecies
 It requires sct to be installed.
-Install it with\n
+Install it with
 * for debian/ubuntu/mint ```sudo apt install sct```
 * for fedora distros ```sudo dnf install sct```
 
