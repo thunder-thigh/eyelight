@@ -6,11 +6,11 @@ There happens to be no application installation yet. I plan on adding it very so
 To run the file with all it's requirements, download the latest release, extract the zip archive.
 1. cd into the extracted archive.
 2. Set the bash script as executable with
-``` sudo chmod +x ./mkdirfile.sh```
+```sudo chmod +x ./mkdirfile.sh```
 3. Execute the script with
-``` sudo ./mkdirfile.sh ```
+```sudo ./mkdirfile.sh ```
 4. Run the binary with
-``` ./EyeLight.out ```
+```./EyeLight.out ```
 5. Change values of files at /etc/.EyeLight/ to edit temperature values
     i. Accepted range of temperature is between 1000 - 10000
    ii. Needs root/admin access to be edited
