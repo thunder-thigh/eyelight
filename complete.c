@@ -60,7 +60,7 @@ int timecheck(){
 	//currentHour = localTime->tm_hour;
 	//printf("%d is the current hour", currentHour);
 	curtime = localTime->tm_hour;
-	printf("%d is the current hour", curtime);
+//	printf("%d is the current hour", curtime);
 
         return 0;
 }
@@ -101,6 +101,10 @@ int main2(){
 */
 //	printf("%d\n", day);
 //	cmdMaker();
+		day = r_day();
+		night = r_night();
+		trans = r_trans();
+
 	if((curtime>4 && curtime<=6) || (curtime>17 && curtime<=18)){
 		execTemp(trans);
 	}
@@ -113,11 +117,13 @@ int main2(){
 }
 
 int main() {
+	
     int fd, wd;
+    timecheck();
     char buffer[BUF_LEN];
-		day = r_day();
-		night = r_night();
-		trans = r_trans();
+//		day = r_day();
+//		night = r_night();
+//		trans = r_trans();
     main2();
     // Specify the file to watch
     const char *folder_to_watch = "/etc/.EyeLight";  // Change to the file you want to monitor
@@ -154,11 +160,9 @@ int main() {
             struct inotify_event *event = (struct inotify_event *) &buffer[i];
             if (event->mask & IN_MODIFY) {
                 // If the file is modified, execute the command
-		day = r_day();
-		night = r_night();
-		trans = r_trans();
+		timecheck();
 		main2();
-		main2();
+	//	main2();
                 // execute_command(command_to_execute);
             }
             i += EVENT_SIZE + event->len;
