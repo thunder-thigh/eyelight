@@ -7,7 +7,7 @@
 #include <pwd.h>
 
 
-#define STEP 50
+#define STEP_TEMP 50
 #define	STEP_DELAY_MS 50
 #define CONFIG /.config/eyelight/temperatures.txt
 
@@ -18,12 +18,56 @@ typedef struct temps{
 	int transition_temp;
 	int night_temp;
 };
- 
-void daemonize() {
+
+void transition(int current_temp, int resultant_temp){
+	int step = (current_temp > resultant_temp)? -STEP : STEP;
+	for (int t = current_temp; (step > 0) ? t <=resultant_temp : t >= resultant_temp; t += step){
+		char command[11];
+		snprintf(command, sizeof(command), "xsct %d", t);
+		system(command);
+		usleep(STEP_DELAY_MS*1000);
+	}
+	
+}
+	 
+int fetch_temps(){
+	struct passwd *pw = getpwuid(getuid());
+	printf("Home directory is: %s\n", pw->pw_dir);
+	
+}
+
+int fetch_config_location(){
+    struct passwd *pw = getpwuid(getuid());
+    if (pw == NULL){
+		perror("Error in finding config's location");
+		exit(EXIT_FAILURE);
+		return 0;
+	}
+}
+
+int main(){
+	fetch_config_location();
+	
+	daemonize();
+	while(1){
+		time_t now = time(NULL);
+		struct tm *tm_info = localtime(&now);
+		if(tm_info->tm_hour==10 && tm_info->tm_min==0){
+			update_temp();
+			if(
+		}
+		sleep(60);
+		
+	}
+	
+}
+
+
+
+/*void daemonize() {
     pid_t pid = fork();
     if (pid < 0) exit(EXIT_FAILURE);
     if (pid > 0) exit(EXIT_SUCCESS); // Parent exits
-
     // Child continues
     umask(0);
     setsid();
@@ -33,21 +77,4 @@ void daemonize() {
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
 }
-
-int update_temp(){
-//    struct passwd *pw = getpwuid(getuid());
-    if (pw == NULL){
-		perror("get_userdetails");
-		return 0;
-	}
-//    else FILE *file = fopen("
-}
-
-
-int main(){
-	struct passwd *pw = getpwuid(getuid());
-	update_temp();
-	printf("Home directory is: %s\n", pw->pw_dir);
-	
-	
-}
+*/
