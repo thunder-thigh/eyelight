@@ -82,9 +82,7 @@ int main() {
                 smooth_transition(current, DAY_TEMP);
             }
         }
-
         sleep(60); // Check every minute
     }
-
     return 0;
 }
