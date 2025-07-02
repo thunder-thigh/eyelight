@@ -80,12 +80,26 @@ int main(){
 	fetch_temps(config_file);
 	daemonize();
 	
-	while(1){
-//		time_t now = time(NULL);
-//		struct tm *tm_info = localtime(&now);
-//		if(tm_info->tm_hour==10 && tm_info->tm_min==0){
-//			update_temp();
-		}
-		sleep(60);
-	}
+	while (1) {
+        time_t now = time(NULL);
+        struct tm *tm_info = localtime(&now);
+
+        int hour = tm_info->tm_hour;
+        int min = tm_info->tm_min;
+
+        if (hour == 10 && min == 0) {
+            int current = load_temp();
+            if (current != NIGHT_TEMP) {
+                smooth_transition(current, NIGHT_TEMP);
+            }
+        } else if (hour == 6 && min == 0) {
+            int current = load_temp();
+            if (current != DAY_TEMP) {
+                smooth_transition(current, DAY_TEMP);
+            }
+        }
+        sleep(60); // Check every minute
+    }
+    return 0;
+}
 }

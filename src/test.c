@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define CONFIG "/.config/eyelight/temperatures.txt"
 char path_to_config[72];
@@ -16,7 +17,7 @@ int fetch_temps(){
 }
 
 int main(){
-	const char *home_directory = getenv("HOME");
+	/*const char *home_directory = getenv("HOME");
 	printf("Home directory is: %s\n", home_directory);
 	printf("%s\n",CONFIG);
 	printf("length is: %d\n", strlen(home_directory));
@@ -25,4 +26,7 @@ int main(){
 	FILE *config_file = fopen(path_to_config, "r");
 	fetch_temps();
 	printf("%d%d%d\n", temps.day_temp, temps.transition_temp, temps.night_temp);
+	*/
+	time_t now = time(NULL);
+	struct tm *tm_info
 }
