@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-#includec <sys/stat.h>
+#include <sys/stat.h>
 #include <sys/types.h>
-#include <pwd.h>
-
+#include <string.h>
 
 #define STEP_TEMP 50
 #define	STEP_DELAY_MS 50
@@ -14,14 +13,14 @@
 //global variables
 char path_to_config[72];	//supports upto 32 char usersnames
 char *home_directory;
-typedef struct temps{
+typedef struct alltemperatures{
 	int day_temp;
 	int transition_temp;
 	int night_temp;
-};
+}temps;
 
 void transition(int current_temp, int resultant_temp){
-	int step = (current_temp > resultant_temp)? -STEP : STEP;
+	int step = (current_temp > resultant_temp)? -STEP_TEMP : STEP_TEMP;
 	for (int t = current_temp; (step > 0) ? t <=resultant_temp : t >= resultant_temp; t += step){
 		char command[11];
 		snprintf(command, sizeof(command), "xsct %d", t);
@@ -44,18 +43,23 @@ void daemonize() {
     close(STDERR_FILENO);
 }
 
-int fetch_temps(){
-	static FILE *config_file = fopen(path_to_config, "r");
-	if(!config_file){
-		perror("Error opening file");
+void fetch_temps(FILE *config_file){
+	fscanf(config_file, "%d\n%d\n%d", &temps.day_temp, &temps.transition_temp, &temps.night_temp);
+}
+
+void generate_config(){
+	FILE *config_file = fopen(path_to_config, "w");
+	if (!config_file){
+		perror("Could not create file, check permissions\n");
 		exit(EXIT_FAILURE);
 	}
-	return config_file;
+	fprintf(config_file, "6500\n5000\n4000");
+	fclose(config_file);
 }
 
 int fetch_config_location(){
-	home_dir = getenv("HOME");
-    if (!home_dir){
+	home_directory = getenv("HOME");
+	    if (!home_directory){
 		perror("Error in finding config's location");
 		exit(EXIT_FAILURE);
 		return 0;
@@ -65,7 +69,15 @@ int fetch_config_location(){
 
 int main(){
 	fetch_config_location();
-	fetch_temps();
+//	open_config();
+	FILE *config_file = fopen(path_to_config, "r");
+	if(!config_file){
+		fclose(config_file);
+		generate_config();
+	}
+	FILE *config_file = fopen(path_to_config, "r");
+	if(!config_file){perror("Error opening file\n");exit(EXIT_FAILURE);}
+	fetch_temps(config_file);
 	daemonize();
 	
 	while(1){
