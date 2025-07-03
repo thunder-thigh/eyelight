@@ -21,7 +21,7 @@ struct alltemperatures{
 int current_temp=0;
 
 void load_current_temp(){
-	printf("load_current_temp function launched\n");
+	//printf("load_current_temp function launched\n");
 	FILE *fp;
 	char xsct_output[40];
 	fp = popen("xsct","r");
@@ -38,7 +38,7 @@ void load_current_temp(){
 }
 
 void smooth_transition(int current_temp, int resultant_temp){
-	printf("Smooth transition func launched\n");
+	//printf("Smooth transition func launched\n");
 	int step = (current_temp > resultant_temp)? -STEP_TEMP : STEP_TEMP;
 	for (int t = current_temp; (step > 0) ? t <=resultant_temp : t >= resultant_temp; t += step){
 		char command[11];
@@ -49,7 +49,7 @@ void smooth_transition(int current_temp, int resultant_temp){
 }
 
 void daemonize() {
-    printf("Daemonize function launced\n");
+    //printf("Daemonize function launced\n");
     pid_t pid = fork();
     if (pid < 0) exit(EXIT_FAILURE);
     if (pid > 0) exit(EXIT_SUCCESS); // Parent exits
@@ -64,12 +64,12 @@ void daemonize() {
 }
 
 void fetch_temps(FILE *config_file){
-	printf("fetch_temps function launched\n");
+	//printf("fetch_temps function launched\n");
 	fscanf(config_file, "%d\n%d\n%d", &temps.day_temp, &temps.transition_temp, &temps.night_temp);
 }
 
 void generate_config(){
-	printf("generate config function laucnhed\n");
+	//printf("generate config function laucnhed\n");
 	FILE *config_file = fopen(path_to_config, "w");
 	if (!config_file){
 		perror("Could not create file, check permissions\n");
@@ -80,7 +80,7 @@ void generate_config(){
 }
 
 int fetch_config_location(){
-	printf("fetch_config_location function laucnhed\n");
+	//printf("fetch_config_location function laucnhed\n");
 	home_directory = getenv("HOME");
 	    if (!home_directory){
 		perror("Error in finding config's location");
@@ -90,7 +90,7 @@ int fetch_config_location(){
 }
 
 void time_check_and_change_temperature(FILE *config_file){
-	printf("time_check_and_change_temperature function launched\n");
+	//printf("time_check_and_change_temperature function launched\n");
 	load_current_temp();
 	fetch_temps(config_file);
 	time_t now = time(NULL);
@@ -133,6 +133,6 @@ int main(){
 	
 	while (1) {
 		time_check_and_change_temperature(config_file);
-		sleep(2); // Check every minute
+		sleep(60); // Check every minute
     }
 }
