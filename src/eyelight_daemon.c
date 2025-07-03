@@ -8,18 +8,37 @@
 
 #define STEP_TEMP 50
 #define	STEP_DELAY_MS 50
-#define CONFIG /.config/eyelight/temperatures.txt
+#define CONFIG "/.config/eyelight/temperatures.txt"
 
 //global variables
-char path_to_config[72];	//supports upto 32 char usersnames
+char path_to_config[73];	//supports upto 32 char usersnames
 char *home_directory;
-typedef struct alltemperatures{
+struct alltemperatures{
 	int day_temp;
 	int transition_temp;
 	int night_temp;
 }temps;
+int current_temp=0;
 
-void transition(int current_temp, int resultant_temp){
+void load_current_temp(){
+	printf("load_current_temp function launched\n");
+	FILE *fp;
+	char xsct_output[40];
+	fp = popen("xsct","r");
+	if(fp == NULL) perror("Failed to run xsct\n");
+	
+	if (fgets(xsct_output, sizeof(xsct_output), fp) != NULL){
+		// Example output: "Screen 0: temperature ~ 5000 0.997068"
+        if (sscanf(xsct_output, "Screen 0: temperature ~ %d", &current_temp) != 1) {
+		printf("Failed to parse temperature.\n");
+		} else {
+		//printf("Extracted temperature: %d\n", current_temp);
+		}
+	}	
+}
+
+void smooth_transition(int current_temp, int resultant_temp){
+	printf("Smooth transition func launched\n");
 	int step = (current_temp > resultant_temp)? -STEP_TEMP : STEP_TEMP;
 	for (int t = current_temp; (step > 0) ? t <=resultant_temp : t >= resultant_temp; t += step){
 		char command[11];
@@ -28,8 +47,9 @@ void transition(int current_temp, int resultant_temp){
 		usleep(STEP_DELAY_MS*1000);
 	}	
 }
-	 
+
 void daemonize() {
+    printf("Daemonize function launced\n");
     pid_t pid = fork();
     if (pid < 0) exit(EXIT_FAILURE);
     if (pid > 0) exit(EXIT_SUCCESS); // Parent exits
@@ -44,10 +64,12 @@ void daemonize() {
 }
 
 void fetch_temps(FILE *config_file){
+	printf("fetch_temps function launched\n");
 	fscanf(config_file, "%d\n%d\n%d", &temps.day_temp, &temps.transition_temp, &temps.night_temp);
 }
 
 void generate_config(){
+	printf("generate config function laucnhed\n");
 	FILE *config_file = fopen(path_to_config, "w");
 	if (!config_file){
 		perror("Could not create file, check permissions\n");
@@ -58,13 +80,40 @@ void generate_config(){
 }
 
 int fetch_config_location(){
+	printf("fetch_config_location function laucnhed\n");
 	home_directory = getenv("HOME");
 	    if (!home_directory){
 		perror("Error in finding config's location");
 		exit(EXIT_FAILURE);
-		return 0;
 	}
-	snprintf(path_to_config, strlen(home_directory)+strlen(CONFIG), "%s%s", home_directory, CONFIG);
+	snprintf(path_to_config, sizeof(path_to_config), "%s%s", home_directory, CONFIG);
+}
+
+void time_check_and_change_temperature(FILE *config_file){
+	printf("time_check_and_change_temperature function launched\n");
+	load_current_temp();
+	fetch_temps(config_file);
+	time_t now = time(NULL);
+	struct tm *tm_info = localtime(&now);
+	int hour = tm_info->tm_hour;
+	//Time checking begins according to hours:
+	// asterisk = not included
+	//19-5 o clock night
+	//6-8 transition
+	//8-16 day
+	//17-18 transition
+	if (hour >= 19 || hour <= 5) {
+		//printf("Night time: %02d:00\n", hour);
+		smooth_transition(current_temp, temps.night_temp);
+	} else if ((hour >= 6 && hour <= 7) || (hour >= 17 && hour <= 18)) {
+		//printf("Transition time: %02d:00\n", hour);
+		smooth_transition(current_temp, temps.transition_temp);
+	} else if (hour >= 8 && hour <= 16) {
+		//printf("Day time: %02d:00\n", hour);
+		smooth_transition(current_temp, temps.day_temp);
+	} else {
+		printf("Unknown time: %02d:00\n", hour);  // safety fallback
+	}
 }
 
 int main(){
@@ -72,34 +121,18 @@ int main(){
 //	open_config();
 	FILE *config_file = fopen(path_to_config, "r");
 	if(!config_file){
-		fclose(config_file);
 		generate_config();
+		config_file = fopen(path_to_config, "r");
+		if(!config_file){
+			perror("Error opening file\n");exit(EXIT_FAILURE);
+		}
 	}
-	FILE *config_file = fopen(path_to_config, "r");
-	if(!config_file){perror("Error opening file\n");exit(EXIT_FAILURE);}
-	fetch_temps(config_file);
-	daemonize();
+	
+	//fetch_temps(config_file);
+//	daemonize();
 	
 	while (1) {
-        time_t now = time(NULL);
-        struct tm *tm_info = localtime(&now);
-
-        int hour = tm_info->tm_hour;
-        int min = tm_info->tm_min;
-
-        if (hour == 10 && min == 0) {
-            int current = load_temp();
-            if (current != NIGHT_TEMP) {
-                smooth_transition(current, NIGHT_TEMP);
-            }
-        } else if (hour == 6 && min == 0) {
-            int current = load_temp();
-            if (current != DAY_TEMP) {
-                smooth_transition(current, DAY_TEMP);
-            }
-        }
-        sleep(60); // Check every minute
+		time_check_and_change_temperature(config_file);
+		sleep(2); // Check every minute
     }
-    return 0;
-}
 }
